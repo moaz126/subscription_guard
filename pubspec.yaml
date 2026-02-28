@@ -1,6 +1,6 @@
 name: subscription_guard
 description: "A declarative, provider-agnostic subscription tier gating package for Flutter. Gate features, widgets, and routes based on subscription tiers with zero purchase SDK dependency."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/moaz126/subscription_guard
 repository: https://github.com/moaz126/subscription_guard
 issue_tracker: https://github.com/moaz126/subscription_guard/issues
