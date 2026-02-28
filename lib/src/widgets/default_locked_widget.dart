@@ -70,6 +70,7 @@ class DefaultLockedWidget extends StatelessWidget {
     this.iconSize = 32.0,
     this.iconColor,
     this.compact = false,
+    this.height,
   });
 
   /// The subscription tier required to unlock the guarded feature.
@@ -112,6 +113,13 @@ class DefaultLockedWidget extends StatelessWidget {
   ///
   /// Defaults to `false`.
   final bool compact;
+
+  /// An optional fixed height for the locked widget.
+  ///
+  /// When provided, the widget is constrained to exactly this height.
+  /// When `null` (the default), a minimum height of `120.0` is applied
+  /// so the icon, message, and upgrade button always fit without overflow.
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +174,7 @@ class DefaultLockedWidget extends StatelessWidget {
     Color resolvedIconColor,
     String resolvedMessage,
   ) {
-    return Center(
+    final content = Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -197,5 +205,11 @@ class DefaultLockedWidget extends StatelessWidget {
         ),
       ),
     );
+
+    if (height != null) {
+      return SizedBox(height: height, child: content);
+    }
+
+    return content;
   }
 }

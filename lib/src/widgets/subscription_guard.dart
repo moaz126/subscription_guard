@@ -83,6 +83,7 @@ class SubscriptionGuard extends StatelessWidget {
     this.lockedBuilder,
     this.allowDuringTrial = true,
     this.onBlocked,
+    this.blurMinHeight = 180.0,
   })  : featureId = null,
         tierIds = null,
         _mode = _GuardMode.tier;
@@ -117,6 +118,7 @@ class SubscriptionGuard extends StatelessWidget {
     this.lockedBuilder,
     this.allowDuringTrial = true,
     this.onBlocked,
+    this.blurMinHeight = 120.0,
   })  : requiredTier = null,
         tierIds = null,
         _mode = _GuardMode.feature;
@@ -150,6 +152,7 @@ class SubscriptionGuard extends StatelessWidget {
     this.lockedBuilder,
     this.allowDuringTrial = true,
     this.onBlocked,
+    this.blurMinHeight = 120.0,
   })  : requiredTier = null,
         featureId = null,
         _mode = _GuardMode.allowedTiers;
@@ -203,6 +206,17 @@ class SubscriptionGuard extends StatelessWidget {
   /// For analytics, prefer using the provider-level `onFeatureBlocked`
   /// callback instead.
   final VoidCallback? onBlocked;
+
+  /// Minimum height for the blurred area when [GuardBehavior.blur] is active.
+  ///
+  /// When the behavior is [GuardBehavior.blur], the child is wrapped in a
+  /// [ConstrainedBox] with this minimum height so the lock overlay always
+  /// has enough space to display properly.
+  ///
+  /// Increase if your locked widget is tall, decrease for inline usage.
+  ///
+  /// Defaults to `120.0`.
+  final double blurMinHeight;
 
   /// The internal mode determining which access check to use.
   final _GuardMode _mode;
@@ -340,25 +354,116 @@ class SubscriptionGuard extends StatelessWidget {
         return _resolveLockedWidget(context, scope, resolvedRequiredTier);
 
       case GuardBehavior.blur:
-        final lockedOverlay =
-            _resolveLockedWidget(context, scope, resolvedRequiredTier);
         return Stack(
           children: [
-            ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
-              child: child,
+            ConstrainedBox(
+              constraints: BoxConstraints(minHeight: blurMinHeight),
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
+                child: child,
+              ),
             ),
             Positioned.fill(
-              child: Container(
-                color: Theme.of(context)
-                    .scaffoldBackgroundColor
-                    .withValues(alpha: 0.3),
-                child: lockedOverlay,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final height = constraints.maxHeight;
+
+                  Widget overlayContent;
+                  if (height >= 120) {
+                    // Full overlay — use lockedBuilder priority chain.
+                    // Wrapped in FittedBox so it scales down gracefully
+                    // if the available space is slightly tight.
+                    overlayContent = FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _resolveLockedWidget(
+                        context,
+                        scope,
+                        resolvedRequiredTier,
+                      ),
+                    );
+                  } else if (height >= 60) {
+                    // Compact: icon + text in a row, tappable
+                    overlayContent = _buildCompactOverlay(
+                      context,
+                      scope,
+                      resolvedRequiredTier,
+                    );
+                  } else {
+                    // Minimal: just lock icon, tappable
+                    overlayContent = _buildMinimalOverlay(
+                      context,
+                      scope,
+                      resolvedRequiredTier,
+                    );
+                  }
+
+                  return Container(
+                    color: Theme.of(context)
+                        .scaffoldBackgroundColor
+                        .withValues(alpha: 0.3),
+                    alignment: Alignment.center,
+                    child: overlayContent,
+                  );
+                },
               ),
             ),
           ],
         );
     }
+  }
+
+  /// Builds a compact overlay for the blur behavior when height is between
+  /// 60 and 120 pixels. Shows a small lock icon and text in a row.
+  Widget _buildCompactOverlay(
+    BuildContext context,
+    SubscriptionGuardScope scope,
+    Tier requiredTier,
+  ) {
+    return GestureDetector(
+      onTap: () => scope.requestUpgrade(requiredTier.id),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.lock_outline,
+            size: 16,
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              'Upgrade to ${requiredTier.label}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7),
+                  ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a minimal overlay for the blur behavior when height is less
+  /// than 60 pixels. Shows only a small lock icon.
+  Widget _buildMinimalOverlay(
+    BuildContext context,
+    SubscriptionGuardScope scope,
+    Tier requiredTier,
+  ) {
+    return GestureDetector(
+      onTap: () => scope.requestUpgrade(requiredTier.id),
+      child: Icon(
+        Icons.lock_outline,
+        size: 14,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+      ),
+    );
   }
 
   /// Finds the highest tier from [tierIds] that exists in the config.

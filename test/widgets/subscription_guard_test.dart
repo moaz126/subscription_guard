@@ -363,6 +363,227 @@ void main() {
       expect(find.byType(Stack), findsWidgets);
       // The child text IS in the tree (just blurred)
       expect(find.text('Blurred Content'), findsOneWidget);
+      // ConstrainedBox enforcing minHeight is present
+      expect(find.byType(ConstrainedBox), findsWidgets);
+    });
+
+    testWidgets('enforces blurMinHeight on child', (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 150,
+          child: SizedBox(height: 40, child: Text('Tiny')),
+        ),
+      ));
+
+      // Find the ConstrainedBox that wraps the blurred child
+      final constrainedBoxes = tester
+          .widgetList<ConstrainedBox>(find.byType(ConstrainedBox))
+          .where((cb) => cb.constraints.minHeight == 150);
+      expect(constrainedBoxes, isNotEmpty);
+    });
+
+    testWidgets('custom blurMinHeight is respected', (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 200,
+          child: SizedBox(height: 40, child: Text('Small')),
+        ),
+      ));
+
+      final constrainedBoxes = tester
+          .widgetList<ConstrainedBox>(find.byType(ConstrainedBox))
+          .where((cb) => cb.constraints.minHeight == 200);
+      expect(constrainedBoxes, isNotEmpty);
+    });
+
+    testWidgets('shows full overlay for tall child (>= 120)', (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          child: SizedBox(height: 200, child: Text('Tall content')),
+        ),
+      ));
+
+      // Full overlay should show DefaultLockedWidget with upgrade button
+      expect(find.byType(DefaultLockedWidget), findsOneWidget);
+      expect(find.text('Upgrade to Pro'), findsOneWidget);
+    });
+
+    testWidgets('shows compact overlay for medium child (60-119)',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 80, // Don't force expand beyond 80
+          child: SizedBox(height: 80, child: Text('Medium')),
+        ),
+      ));
+
+      // Compact overlay shows "Upgrade to Pro" text in a Row
+      expect(find.text('Upgrade to Pro'), findsOneWidget);
+      // But no DefaultLockedWidget (that's the full overlay)
+      expect(find.byType(DefaultLockedWidget), findsNothing);
+    });
+
+    testWidgets('shows minimal overlay for very short child (< 60)',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 40, // Don't force expand
+          child: SizedBox(height: 40, child: Text('Tiny')),
+        ),
+      ));
+
+      // Minimal overlay: just a lock icon, no text
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+      expect(find.byType(DefaultLockedWidget), findsNothing);
+    });
+
+    testWidgets('compact overlay is tappable and calls requestUpgrade',
+        (tester) async {
+      Tier? upgradedTier;
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        onUpgradeRequested: (tier) => upgradedTier = tier,
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 80,
+          child: SizedBox(height: 80, child: Text('Medium')),
+        ),
+      ));
+
+      // Tap the compact overlay GestureDetector
+      await tester.tap(find.byType(GestureDetector).last);
+      await tester.pump();
+
+      expect(upgradedTier, isNotNull);
+      expect(upgradedTier!.id, 'pro');
+    });
+
+    testWidgets('minimal overlay is tappable and calls requestUpgrade',
+        (tester) async {
+      Tier? upgradedTier;
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        onUpgradeRequested: (tier) => upgradedTier = tier,
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 40,
+          child: SizedBox(height: 40, child: Text('Tiny')),
+        ),
+      ));
+
+      await tester.tap(find.byType(GestureDetector).last);
+      await tester.pump();
+
+      expect(upgradedTier, isNotNull);
+      expect(upgradedTier!.id, 'pro');
+    });
+
+    testWidgets('uses lockedBuilder for full overlay only', (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          lockedBuilder: (_, __, ___) => const Text('CUSTOM LOCKED'),
+          child: const SizedBox(height: 200, child: Text('Tall content')),
+        ),
+      ));
+
+      // Full height — uses lockedBuilder
+      expect(find.text('CUSTOM LOCKED'), findsOneWidget);
+      expect(find.byType(DefaultLockedWidget), findsNothing);
+    });
+
+    testWidgets('does not use lockedBuilder for compact overlay',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 80,
+          lockedBuilder: (_, __, ___) => const Text('CUSTOM LOCKED'),
+          child: const SizedBox(height: 80, child: Text('Medium')),
+        ),
+      ));
+
+      // Compact height — ignores lockedBuilder, uses built-in compact
+      expect(find.text('CUSTOM LOCKED'), findsNothing);
+      expect(find.text('Upgrade to Pro'), findsOneWidget);
+    });
+
+    testWidgets('default blurMinHeight is 120', (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard(
+          requiredTier: 'pro',
+          behavior: GuardBehavior.blur,
+          child: SizedBox(height: 30, child: Text('Short')),
+        ),
+      ));
+
+      // Default blurMinHeight 120 means ConstrainedBox(minHeight: 120)
+      final constrainedBoxes = tester
+          .widgetList<ConstrainedBox>(find.byType(ConstrainedBox))
+          .where((cb) => cb.constraints.minHeight == 120);
+      expect(constrainedBoxes, isNotEmpty);
+      // With minHeight 120, the full overlay should appear
+      expect(find.byType(DefaultLockedWidget), findsOneWidget);
+    });
+  });
+
+  // =========================================================================
+  // Group 2b: SubscriptionGuard — adaptive blur with feature constructor
+  // =========================================================================
+  group('SubscriptionGuard — blur with feature constructor', () {
+    testWidgets('feature constructor supports blurMinHeight', (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard.feature(
+          featureId: 'advanced_stats',
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 80,
+          child: SizedBox(height: 80, child: Text('Stats')),
+        ),
+      ));
+
+      // Compact overlay with feature-resolved tier
+      expect(find.text('Upgrade to Pro'), findsOneWidget);
+      expect(find.byType(DefaultLockedWidget), findsNothing);
+    });
+
+    testWidgets('allowedTiers constructor supports blurMinHeight',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(
+        currentTier: 'free',
+        child: const SubscriptionGuard.allowedTiers(
+          tierIds: ['pro'],
+          behavior: GuardBehavior.blur,
+          blurMinHeight: 80,
+          child: SizedBox(height: 80, child: Text('Pro Only')),
+        ),
+      ));
+
+      // Compact overlay — allowedTiers resolves to highest tier in list
+      expect(find.byType(DefaultLockedWidget), findsNothing);
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
     });
   });
 
