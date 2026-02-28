@@ -19,6 +19,14 @@ library;
 /// );
 /// print(trial.daysRemaining); // 15
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionGuardProvider], which accepts a [TrialInfo] to propagate
+///   trial state down the tree.
+/// - [TrialBanner], a widget that displays trial countdown UI.
+/// - [SubscriptionGuardScope.isTrialing], which delegates to
+///   [TrialInfo.isActive].
 class TrialInfo {
   /// Creates a new [TrialInfo] with the given [isTrialing] flag and optional
   /// [endsAt] date.

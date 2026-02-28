@@ -37,6 +37,13 @@ import '../providers/subscription_guard_scope.dart';
 ///   onTap: () => showUpgradeDialog(),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [TrialInfo], the model class providing trial state data.
+/// - [SubscriptionGuardScope], which exposes the [TrialInfo] read by this
+///   widget.
+/// - [SubscriptionGuardProvider], where trial state is configured.
 class TrialBanner extends StatelessWidget {
   /// Creates a [TrialBanner] that displays trial status from the nearest
   /// [SubscriptionGuardScope].

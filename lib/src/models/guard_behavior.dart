@@ -20,6 +20,13 @@ library;
 ///   child: PremiumWidget(),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionGuard], which uses this enum to determine locked behavior.
+/// - [SubscriptionGuardProvider], where the app-wide default behavior is set
+///   via `defaultBehavior`.
+/// - [DefaultLockedWidget], the built-in widget shown for [replace] behavior.
 enum GuardBehavior {
   /// Completely removes the widget from the widget tree.
   ///
@@ -46,6 +53,11 @@ enum GuardBehavior {
   /// The original child is rendered but obscured by a blur filter, with
   /// a lock icon or overlay displayed on top to indicate the feature is
   /// locked.
+  ///
+  /// The overlay adapts to the available space:
+  /// - **Full** (≥ 120 px): Shows the complete locked widget.
+  /// - **Compact** (60–119 px): Shows a lock icon and "Upgrade" text.
+  /// - **Minimal** (< 60 px): Shows only a lock icon.
   blur;
 
   /// Returns a human-readable description of this behavior.

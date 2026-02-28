@@ -92,6 +92,12 @@ import '../widgets/default_locked_widget.dart';
 ///   print('Blocked — need ${result.requiredTier?.label}');
 /// }
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionRouteGuard.checkAccess], which creates this result.
+/// - [SubscriptionRouteGuard.checkFeatureAccess], which creates this result
+///   for feature-based checks.
 class RouteAccessResult {
   /// Creates a [RouteAccessResult].
   ///
@@ -164,6 +170,12 @@ class RouteAccessResult {
 ///   ),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [subscriptionFeatureRedirect], the feature-based equivalent.
+/// - [SubscriptionRouteGuard], for programmatic (non-GoRouter) navigation.
+/// - [SubscriptionGuard], for declarative widget-level gating.
 String? Function(BuildContext context, dynamic state) subscriptionRedirect({
   required String requiredTier,
   required String redirectPath,
@@ -235,6 +247,12 @@ String? Function(BuildContext context, dynamic state) subscriptionRedirect({
 ///   ),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [subscriptionRedirect], the tier-based equivalent.
+/// - [SubscriptionRouteGuard], for programmatic (non-GoRouter) navigation.
+/// - [SubscriptionConfig.features], the feature map used for lookups.
 String? Function(BuildContext context, dynamic state)
     subscriptionFeatureRedirect({
   required String featureId,
@@ -304,6 +322,14 @@ String? Function(BuildContext context, dynamic state)
 ///   Navigator.pushNamed(context, '/pro-feature');
 /// }
 /// ```
+///
+/// See also:
+///
+/// - [RouteAccessResult], the result returned by access check methods.
+/// - [subscriptionRedirect], for GoRouter-compatible redirect functions.
+/// - [SubscriptionPageRoute], for a [MaterialPageRoute] with built-in
+///   tier gating.
+/// - [SubscriptionGuard], for declarative widget-level gating.
 abstract final class SubscriptionRouteGuard {
   // ------------------------------------------------------------------
   // Programmatic access checks
@@ -605,7 +631,7 @@ abstract final class SubscriptionRouteGuard {
 ///
 /// > **Note:** Unlike [SubscriptionRouteGuard.pushGuarded], this route
 /// > always pushes — it just changes what is displayed based on access.
-/// > Use [pushGuarded] if you want to prevent the push entirely.
+/// > Use [SubscriptionRouteGuard.pushGuarded] if you want to prevent the push entirely.
 ///
 /// Example:
 /// ```dart
@@ -617,6 +643,14 @@ abstract final class SubscriptionRouteGuard {
 ///   ),
 /// );
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionRouteGuard.pushGuarded], which prevents the push entirely
+///   when blocked.
+/// - [subscriptionRedirect], for GoRouter-compatible redirect functions.
+/// - [DefaultLockedWidget], the fallback UI shown when [blockedBuilder] is
+///   `null`.
 class SubscriptionPageRoute<T> extends MaterialPageRoute<T> {
   /// Creates a [SubscriptionPageRoute] that guards its content behind the
   /// tier identified by [requiredTier].

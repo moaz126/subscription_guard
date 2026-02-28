@@ -49,6 +49,13 @@ import 'subscription_guard_scope.dart';
 ///   child: MyApp(),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionGuardScope], the [InheritedWidget] that propagates state.
+/// - [SubscriptionConfig], the tier and feature configuration.
+/// - [SubscriptionGuard], the widget used to gate individual features.
+/// - [TrialInfo], for trial/grace period state.
 class SubscriptionGuardProvider extends StatefulWidget {
   /// Creates a [SubscriptionGuardProvider] with the given configuration and
   /// state.

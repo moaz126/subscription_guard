@@ -20,6 +20,14 @@ library;
 /// ```dart
 /// final proTier = Tier(id: 'pro', level: 2, label: 'Pro');
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionConfig], which holds a list of tiers and feature mappings.
+/// - [SubscriptionGuardScope], which exposes the current tier to the widget
+///   tree.
+/// - [SubscriptionGuardProvider], which resolves a tier id string into a
+///   [Tier] object.
 class Tier implements Comparable<Tier> {
   /// Creates a new [Tier] with the given [id], [level], and [label].
   ///

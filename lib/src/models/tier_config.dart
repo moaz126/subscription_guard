@@ -31,6 +31,14 @@ import 'tier.dart';
 ///   },
 /// );
 /// ```
+///
+/// See also:
+///
+/// - [Tier], the model class for individual subscription tiers.
+/// - [SubscriptionGuardProvider], which accepts a [SubscriptionConfig] to
+///   power the widget tree.
+/// - [SubscriptionGuardScope], which provides access to the config for
+///   descendant widgets.
 class SubscriptionConfig {
   /// Creates a new [SubscriptionConfig] with the given [tiers] and optional
   /// [features] mapping.

@@ -42,6 +42,12 @@ import '../models/tier.dart';
 ///   compact: true,
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionGuard], which uses this widget as its default locked UI.
+/// - [GuardBehavior.replace], the behavior mode that shows this widget.
+/// - [Tier], the model class for the [requiredTier] and [currentTier] params.
 class DefaultLockedWidget extends StatelessWidget {
   /// Creates a [DefaultLockedWidget] showing a locked state for the given tiers.
   ///

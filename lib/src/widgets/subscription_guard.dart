@@ -58,6 +58,14 @@ import 'default_locked_widget.dart';
 ///   child: AdvancedAnalyticsWidget(),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [GuardBehavior], the enum controlling what happens when access is denied.
+/// - [DefaultLockedWidget], the built-in fallback UI for [GuardBehavior.replace].
+/// - [SubscriptionGuardProvider], which must be an ancestor in the widget tree.
+/// - [SubscriptionGuardScope], where the current tier and config are read from.
+/// - [SubscriptionRouteGuard], for route-level (navigation) access checks.
 class SubscriptionGuard extends StatelessWidget {
   /// Creates a [SubscriptionGuard] that gates [child] behind the tier
   /// identified by [requiredTier] using hierarchy-based access checks.
@@ -69,7 +77,8 @@ class SubscriptionGuard extends StatelessWidget {
   /// - [requiredTier]: The minimum tier id needed to show [child].
   /// - [child]: The widget to display when access is granted.
   /// - [behavior]: Override the provider's default [GuardBehavior].
-  ///   If `null`, falls back to the provider's [defaultBehavior].
+  ///   If `null`, falls back to the provider's default behavior
+  ///   (see [SubscriptionGuardProvider.defaultBehavior]).
   /// - [lockedBuilder]: Widget-level override for the locked UI.
   /// - [allowDuringTrial]: If `true` (default), trialing users with a
   ///   matching tier get access regardless of tier level.
@@ -177,8 +186,9 @@ class SubscriptionGuard extends StatelessWidget {
 
   /// The guard behavior to apply when access is denied.
   ///
-  /// If `null`, falls back to the provider's [defaultBehavior]
-  /// (which defaults to [GuardBehavior.replace]).
+  /// If `null`, falls back to the provider's default behavior
+  /// (see [SubscriptionGuardProvider.defaultBehavior]),
+  /// which defaults to [GuardBehavior.replace].
   final GuardBehavior? behavior;
 
   /// An optional widget-level override for the locked UI.

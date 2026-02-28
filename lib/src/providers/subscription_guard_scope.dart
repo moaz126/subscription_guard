@@ -34,6 +34,14 @@ import '../models/trial_info.dart';
 ///   // show pro feature
 /// }
 /// ```
+///
+/// See also:
+///
+/// - [SubscriptionGuardProvider], the public-facing widget that manages
+///   state and builds this scope.
+/// - [SubscriptionGuard], the declarative widget that uses this scope to
+///   gate features.
+/// - [SubscriptionConfig], the configuration object exposed by this scope.
 class SubscriptionGuardScope extends InheritedWidget {
   /// Creates a [SubscriptionGuardScope] with the given subscription state.
   ///

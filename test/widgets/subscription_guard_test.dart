@@ -529,7 +529,7 @@ void main() {
       expect(find.text('Upgrade to Pro'), findsOneWidget);
     });
 
-    testWidgets('default blurMinHeight is 120', (tester) async {
+    testWidgets('default blurMinHeight is 180', (tester) async {
       await tester.pumpWidget(buildTestApp(
         currentTier: 'free',
         child: const SubscriptionGuard(
@@ -539,10 +539,10 @@ void main() {
         ),
       ));
 
-      // Default blurMinHeight 120 means ConstrainedBox(minHeight: 120)
+      // Default blurMinHeight 180 means ConstrainedBox(minHeight: 180)
       final constrainedBoxes = tester
           .widgetList<ConstrainedBox>(find.byType(ConstrainedBox))
-          .where((cb) => cb.constraints.minHeight == 120);
+          .where((cb) => cb.constraints.minHeight == 180);
       expect(constrainedBoxes, isNotEmpty);
       // With minHeight 120, the full overlay should appear
       expect(find.byType(DefaultLockedWidget), findsOneWidget);

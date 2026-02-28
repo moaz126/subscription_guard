@@ -19,6 +19,10 @@ import '../providers/subscription_guard_scope.dart';
 ///
 /// Used by [SubscriptionGuardDebugOverlay.initialPosition] to place the FAB
 /// at a specific corner or side of the screen on first render.
+///
+/// See also:
+///
+/// - [SubscriptionGuardDebugOverlay], the widget that uses this position.
 enum DebugOverlayPosition {
   /// Top-left corner of the screen.
   topLeft,
@@ -126,6 +130,14 @@ enum DebugOverlayPosition {
 ///   child: MyApp(),
 /// )
 /// ```
+///
+/// See also:
+///
+/// - [DebugOverlayPosition], the enum controlling initial FAB placement.
+/// - [SubscriptionGuardProvider], which provides the subscription state
+///   displayed in the debug panel.
+/// - [SubscriptionGuardScope], which the overlay reads to display tier and
+///   feature information.
 class SubscriptionGuardDebugOverlay extends StatefulWidget {
   /// Creates a [SubscriptionGuardDebugOverlay].
   ///
