@@ -1,3 +1,7 @@
+## 0.0.2 — 2026-02-28
+
+- Updated author information in README and LICENSE
+
 ## 0.0.1 — 2026-02-28
 
 - Initial release

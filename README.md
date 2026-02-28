@@ -403,6 +403,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ---
 
-Built with ❤️ by [YOUR_NAME](https://github.com/YOUR_GITHUB_USERNAME)
+Built with ❤️ by [Moaz](https://github.com/moaz126)
 
 If this package helps you, please ⭐ the repo and 👍 on [pub.dev](https://pub.dev/packages/subscription_guard)!
